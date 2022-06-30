@@ -1,0 +1,13 @@
+{
+	"ignorePaths": [
+		"*.snap",
+		"node_modules",
+		"package-lock.json",
+		"coverage/**",
+		"dist/**",
+		"package.json",
+		".cspell.json",
+		".vscode/**",
+		"Insomnia.json"
+	]
+}
