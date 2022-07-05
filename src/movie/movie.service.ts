@@ -4,11 +4,13 @@ import { UpdateMovieDto } from './update-movie.dto';
 import { MovieModel } from './movie.model';
 import { DocumentType, ModelType } from '@typegoose/typegoose/lib/types';
 import { Types } from 'mongoose';
+import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
 export class MovieService {
 	constructor(
-		@InjectModel(MovieModel) private readonly MovieModel: ModelType<MovieModel>
+		@InjectModel(MovieModel) private readonly MovieModel: ModelType<MovieModel>,
+		private readonly telegramService: TelegramService
 	) {}
 
 	async getAll(searchTerm?: string) {
@@ -111,7 +113,10 @@ export class MovieService {
 		return doc._id;
 	}
 	async update(_id: string, dto: UpdateMovieDto) {
-		/* Telegram notification */
+		if (!dto.isSendTelegram) {
+			await this.sendNotification(dto)
+			dto.isSendTelegram = true
+		}
 		const updateDoc = await this.MovieModel.findByIdAndUpdate(_id, dto, {
 			new: true,
 		}).exec();
@@ -123,5 +128,25 @@ export class MovieService {
 		const deleteDoc = await this.MovieModel.findByIdAndDelete(id).exec();
 		if (!deleteDoc) throw new NotFoundException('Movie not found');
 		return deleteDoc;
+	}
+	async sendNotification(dto: UpdateMovieDto) {
+		// if (process.env.NODE_ENV !== 'development')
+			// await this.telegramService.sendPhoto(dto.poster);
+			await this.telegramService.sendPhoto(
+				'https://images.fanart.tv/fanart/john-wick-chapter-two-59249c3a76bbf.jpg'
+			);
+		const msg = `<b>${dto.title}</b>`;
+		await this.telegramService.sendMessage(msg, {
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{
+							url: 'https://okko.tv/movie/free-guy',
+							text: '🍿Go to watch',
+						},
+					],
+				],
+			},
+		});
 	}
 }
