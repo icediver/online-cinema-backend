@@ -45,7 +45,9 @@ export class MovieService {
 		return docs;
 	}
 
-	async byGenres(genreIds: Types.ObjectId[]): Promise<DocumentType<MovieModel>[]> {
+	async byGenres(
+		genreIds: Types.ObjectId[]
+	): Promise<DocumentType<MovieModel>[]> {
 		// const docs = await this.MovieModel.find({
 		// 	genres: { $in: genreIds },
 		// }).exec();
@@ -73,6 +75,18 @@ export class MovieService {
 		if (!updateDoc) throw new NotFoundException('Movie not found');
 
 		return updateDoc;
+	}
+
+	async updateRating(id: Types.ObjectId, newRating: number) {
+		return this.MovieModel.findByIdAndUpdate(
+			id,
+			{
+				rating: newRating,
+			},
+			{
+				new: true,
+			}
+		).exec();
 	}
 
 	/* Admin place */
